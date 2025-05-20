@@ -1,2 +1,146 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.Json;
+
+namespace TaskTracker
+{
+    class Program
+    {
+
+        public static string FILENAME = "tasks.json";
+        public static string FILEPATH = Path.Combine(Directory.GetCurrentDirectory(), FILENAME);
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello, Welcome to your Task Tracker!\n");
+
+            List<TaskItem> taskList = ImportTasksJsonFile();
+
+            // Create a Dictionary of all the commands
+            Dictionary<string, string> commands = new Dictionary<string, string>
+            {
+                { "add", "Add a new task" },
+                { "update", "Update an existing task" },
+                { "delete", "Delete a task" }
+            };
+
+            // Display the commands to the user
+            Console.WriteLine("Available commands:");
+            foreach (var command in commands)
+            {
+                Console.WriteLine($" - {command.Key}: {command.Value}");
+            }
+
+            // Ask user for a command
+            Console.WriteLine("\nEnter a command: ");
+            string cmdLine = Console.ReadLine();
+
+            // try splitting the cmdLine
+            string cmdVerb = cmdLine.Split(' ')[0];
+
+            // todo: check cmdWords[0] exists / search positional arguments
+
+            string taskName = string.Empty;
+
+            // check which command verb was called
+            switch (cmdVerb)
+            {
+                case "add":
+                    // todo: check taskName exists
+                    taskName = cmdLine.Split('"', '"')[1];
+                    AddTask(taskName, taskList);
+                    break;
+                case "update":
+                    int id = int.Parse(cmdLine.Split(' ')[1]);
+                    taskName = cmdLine.Split('"', '"')[1];
+                    UpdateTask(id, taskName, taskList);
+                    break;
+                default:
+                    Console.WriteLine("Unknown command. Please try again.");
+                    break;
+            }
+        }
+
+
+        static void AddTask(string taskName, List<TaskItem> taskList)
+        {
+            Console.WriteLine($"Adding task {taskName}...");
+
+            // create task item
+            var newTask = CreateTaskItem(taskName);
+
+            // add to list
+            taskList.Add(newTask);
+
+            WriteToTaskListToFile(taskList);
+        }
+
+        static void UpdateTask(int id, string taskName, List<TaskItem> taskList)
+        {
+            Console.WriteLine($"Updating task with id {id}...");
+
+            // todo: look at enumerable / linq
+            // taskList.FirstOrDefault(i => i.Id == 1)
+
+            // find item on list with matching id
+
+            // update item
+
+            // write to file
+            WriteToTaskListToFile(taskList);
+        }
+
+        static List<TaskItem> ImportTasksJsonFile()
+        {
+            // check if file exists
+            if (!File.Exists(FILEPATH))
+            {
+                Console.WriteLine($"File doesn't exist... Creating file.");
+                // if not, create file
+                File.Create(FILEPATH).Close();
+                Console.WriteLine($"File created.");
+            }
+
+            // read file contents
+            string jsonString = File.ReadAllText(FILEPATH);
+
+            // convert json string to object
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                Console.WriteLine($"File is empty... Creating empty list.");
+                // if file is empty, create empty list
+                return new List<TaskItem>();
+            }
+            else
+            {
+                var tasks = JsonSerializer.Deserialize<List<TaskItem>>(jsonString);
+                return tasks ?? new List<TaskItem>(); // Ensure a non-null return value
+            }
+        }
+
+        static void WriteToTaskListToFile(List<TaskItem> taskList)
+        {
+            // serialize object
+            string jsonString = JsonSerializer.Serialize(taskList);
+
+            // write to file
+            File.WriteAllText(FILEPATH, jsonString);
+
+            Console.WriteLine(jsonString);
+        }
+
+        static TaskItem CreateTaskItem(string taskName)
+        {
+            // todo: generate id
+            return new TaskItem
+            {
+                Id = 1,
+                Description = taskName,
+                Status = "todo",
+                createdAt = DateTime.Now,
+                updatedAt = DateTime.Now
+            };
+        }
+    }
+}
