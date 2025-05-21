@@ -46,8 +46,8 @@ namespace TaskTracker
 
                 // todo: check cmdWords[0] exists / search positional arguments
 
-                string taskName = string.Empty;
-                int id = 0;
+                string taskName;
+                int id;
 
                 // check which command verb was called
                 switch (cmdVerb)
