@@ -22,7 +22,8 @@ namespace TaskTracker
             {
                 { "add", "Add a new task" },
                 { "update", "Update an existing task" },
-                { "delete", "Delete a task" }
+                { "delete", "Delete a task" },
+                { "end" , "End Program"}
             };
 
             // Display the commands to the user
@@ -32,43 +33,61 @@ namespace TaskTracker
                 Console.WriteLine($" - {command.Key}: {command.Value}");
             }
 
-            // Ask user for a command
-            Console.WriteLine("\nEnter a command: ");
-            string cmdLine = Console.ReadLine();
+            string? cmdLine = "";
 
-            // try splitting the cmdLine
-            string cmdVerb = cmdLine.Split(' ')[0];
-
-            // todo: check cmdWords[0] exists / search positional arguments
-
-            string taskName = string.Empty;
-
-            // check which command verb was called
-            switch (cmdVerb)
+            while (cmdLine != "end")
             {
-                case "add":
-                    // todo: check taskName exists
-                    taskName = cmdLine.Split('"', '"')[1];
-                    AddTask(taskName, taskList);
-                    break;
-                case "update":
-                    int id = int.Parse(cmdLine.Split(' ')[1]);
-                    taskName = cmdLine.Split('"', '"')[1];
-                    UpdateTask(id, taskName, taskList);
-                    break;
-                default:
-                    Console.WriteLine("Unknown command. Please try again.");
-                    break;
+                // Ask user for a command
+                Console.WriteLine("\nEnter a command: ");
+                cmdLine = Console.ReadLine();
+
+                // try splitting the cmdLine
+                string cmdVerb = cmdLine.Split(' ')[0];
+
+                // todo: check cmdWords[0] exists / search positional arguments
+
+                string taskName = string.Empty;
+                int id = 0;
+
+                // check which command verb was called
+                switch (cmdVerb)
+                {
+                    case "add":
+                        // todo: check taskName exists
+                        taskName = cmdLine.Split('"', '"')[1];
+                        AddTask(taskName, taskList);
+                        break;
+                    case "update":
+                        id = int.Parse(cmdLine.Split(' ')[1]);
+                        taskName = cmdLine.Split('"', '"')[1];
+                        UpdateTask(id, taskList, description: taskName);
+                        break;
+                    case "delete":
+                        id = int.Parse(cmdLine.Split(' ')[1]);
+                        DeleteTask(id, taskList);
+                        break;
+                    case "mark-in-progress":
+                        id = int.Parse(cmdLine.Split(' ')[1]);
+                        UpdateTask(id, taskList, status: "in-progress");    // todo: change these to constants
+                        break;
+                    case "mark-done":
+                        id = int.Parse(cmdLine.Split(' ')[1]);
+                        UpdateTask(id, taskList, status: "done");    // todo: change these to constants
+                        break;
+                    default:
+                        Console.WriteLine("Unknown command. Please try again.");
+                        break;
+                }
             }
         }
-
 
         static void AddTask(string taskName, List<TaskItem> taskList)
         {
             Console.WriteLine($"Adding task {taskName}...");
 
             // create task item
-            var newTask = CreateTaskItem(taskName);
+            var newTaskId = taskList.Any() ? taskList.Max(x => x.Id) + 1 : 1;
+            var newTask = CreateTaskItem(newTaskId, taskName);
 
             // add to list
             taskList.Add(newTask);
@@ -76,16 +95,44 @@ namespace TaskTracker
             WriteToTaskListToFile(taskList);
         }
 
-        static void UpdateTask(int id, string taskName, List<TaskItem> taskList)
+        static void UpdateTask(int id, List<TaskItem> taskList, string? description=null, string? status=null)
         {
             Console.WriteLine($"Updating task with id {id}...");
 
-            // todo: look at enumerable / linq
-            // taskList.FirstOrDefault(i => i.Id == 1)
+            // Find item on list with matching id
+            var task = taskList.FirstOrDefault(i => i.Id == id);
+
+            // Update item
+            if (task != null)
+            {
+                if (description != null)
+                {
+                    task.Description = description;
+                }
+                if (status != null)
+                {
+                    task.Status = status;
+                }
+                task.updatedAt = DateTime.Now;
+            }
+            else
+            {
+                Console.WriteLine($"Task with id={id} doesn't exist.");
+
+            }
+
+            // write to file
+            WriteToTaskListToFile(taskList);
+        }
+
+        static void DeleteTask(int id, List<TaskItem> taskList)
+        {
+            Console.WriteLine($"Deleting task with id {id}...");
 
             // find item on list with matching id
+            var task = taskList.FirstOrDefault(i => i.Id == id);
 
-            // update item
+            if (task != null) taskList.Remove(task);
 
             // write to file
             WriteToTaskListToFile(taskList);
@@ -130,14 +177,14 @@ namespace TaskTracker
             Console.WriteLine(jsonString);
         }
 
-        static TaskItem CreateTaskItem(string taskName)
+        static TaskItem CreateTaskItem(int id, string description, string status="todo")
         {
             // todo: generate id
             return new TaskItem
             {
-                Id = 1,
-                Description = taskName,
-                Status = "todo",
+                Id = id,
+                Description = description,
+                Status = status,
                 createdAt = DateTime.Now,
                 updatedAt = DateTime.Now
             };
