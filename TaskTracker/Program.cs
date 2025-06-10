@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace TaskTracker
 {
     class Program
     {
+        // Define constants for task statuses
+        public const string STATUS_TODO = "todo";
+        public const string STATUS_IN_PROGRESS = "in-progress";
+        public const string STATUS_DONE = "done";
 
         public static string FILENAME = "tasks.json";
         public static string FILEPATH = Path.Combine(Directory.GetCurrentDirectory(), FILENAME);
@@ -39,12 +44,16 @@ namespace TaskTracker
             {
                 // Ask user for a command
                 Console.WriteLine("\nEnter a command: ");
-                cmdLine = Console.ReadLine();
+                cmdLine = Console.ReadLine();   // todo check readline is not null and valid
 
                 // try splitting the cmdLine
-                string cmdVerb = cmdLine.Split(' ')[0];
-
-                // todo: check cmdWords[0] exists / search positional arguments
+                string[] cmdLineArgs = cmdLine.Split(' ');
+                if (cmdLineArgs.Length == 0 || string.IsNullOrWhiteSpace(cmdLineArgs[0]))
+                {
+                    Console.WriteLine("Invalid command. Please try again.");
+                    continue;
+                }
+                string cmdVerb = cmdLineArgs[0];
 
                 string taskName;
                 int id;
@@ -58,21 +67,27 @@ namespace TaskTracker
                         AddTask(taskName, taskList);
                         break;
                     case "update":
-                        id = int.Parse(cmdLine.Split(' ')[1]);
+                        id = int.Parse(cmdLineArgs[1]);
                         taskName = cmdLine.Split('"', '"')[1];
                         UpdateTask(id, taskList, description: taskName);
                         break;
                     case "delete":
-                        id = int.Parse(cmdLine.Split(' ')[1]);
+                        id = int.Parse(cmdLineArgs[1]);
                         DeleteTask(id, taskList);
                         break;
                     case "mark-in-progress":
-                        id = int.Parse(cmdLine.Split(' ')[1]);
-                        UpdateTask(id, taskList, status: "in-progress");    // todo: change these to constants
+                        id = int.Parse(cmdLineArgs[1]);
+                        UpdateTask(id, taskList, status: STATUS_IN_PROGRESS);
                         break;
                     case "mark-done":
-                        id = int.Parse(cmdLine.Split(' ')[1]);
-                        UpdateTask(id, taskList, status: "done");    // todo: change these to constants
+                        id = int.Parse(cmdLineArgs[1]);
+                        UpdateTask(id, taskList, status: STATUS_DONE);
+                        break;
+                    case "list":
+                        if (cmdLineArgs.Length == 1)
+                            ListTasks(taskList);
+                        else
+                            ListTasks(taskList, cmdLineArgs[1]);
                         break;
                     default:
                         Console.WriteLine("Unknown command. Please try again.");
@@ -95,7 +110,7 @@ namespace TaskTracker
             WriteToTaskListToFile(taskList);
         }
 
-        static void UpdateTask(int id, List<TaskItem> taskList, string? description=null, string? status=null)
+        static void UpdateTask(int id, List<TaskItem> taskList, string? description = null, string? status = null)
         {
             Console.WriteLine($"Updating task with id {id}...");
 
@@ -174,10 +189,10 @@ namespace TaskTracker
             // write to file
             File.WriteAllText(FILEPATH, jsonString);
 
-            Console.WriteLine(jsonString);
+            //Console.WriteLine(jsonString);    // todo: change to debug log maybe?
         }
 
-        static TaskItem CreateTaskItem(int id, string description, string status="todo")
+        static TaskItem CreateTaskItem(int id, string description, string status = STATUS_TODO)
         {
             // todo: generate id
             return new TaskItem
@@ -188,6 +203,27 @@ namespace TaskTracker
                 createdAt = DateTime.Now,
                 updatedAt = DateTime.Now
             };
+        }
+
+        static void ListTasks(List<TaskItem> taskList, string? status = null)
+        {
+            if (taskList.Count == 0)
+            {
+                Console.WriteLine("No tasks found.");
+                return;
+            }
+
+            string[] headers = { "Id", "Description", "Status", "Created At", "Updated At" };
+
+            Console.WriteLine($"| {headers[0],-5} | {headers[1],-20} | {headers[2],-15} | {headers[3],-25} | {headers[4],-25} |");
+
+            foreach (TaskItem task in taskList)
+            {
+                if (status == null || task.Status == status)
+                {
+                    Console.WriteLine($"| {task.Id,-5} | {task.Description,-20} | {task.Status,-15} | {task.createdAt,-25} | {task.updatedAt,-25} |");
+                }
+            }
         }
     }
 }
