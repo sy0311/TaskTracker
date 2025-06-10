@@ -13,6 +13,17 @@ namespace TaskTracker
         public const string DONE = "done";
     }
 
+    public class Commands
+    {
+        public const string ADD = "add";
+        public const string UPDATE = "update";
+        public const string DELETE = "delete";
+        public const string MARK_IN_PROGRESS = "mark-in-progress";
+        public const string MARK_DONE = "mark-done";
+        public const string LIST = "list";
+        public const string EXIT = "exit";
+    }
+
     public class Constants
     {
         public const string FILENAME = "tasks.json";
