@@ -12,7 +12,7 @@ namespace TaskTracker
         {
             Console.WriteLine("Hello, Welcome to your Task Tracker!\n");
 
-            List<TaskItem> taskList = ImportTasksJsonFile();
+            List<TaskItem> taskList = FileManager.ImportTasksJsonFile();
 
             // Create a Dictionary of all the commands
             Dictionary<string, string> commands = new Dictionary<string, string>
@@ -99,7 +99,7 @@ namespace TaskTracker
             // add to list
             taskList.Add(newTask);
 
-            WriteToTaskListToFile(taskList);
+            FileManager.WriteToTaskListToFile(taskList);
         }
 
         static void UpdateTask(int id, List<TaskItem> taskList, string? description = null, string? status = null)
@@ -129,7 +129,7 @@ namespace TaskTracker
             }
 
             // write to file
-            WriteToTaskListToFile(taskList);
+            FileManager.WriteToTaskListToFile(taskList);
         }
 
         static void DeleteTask(int id, List<TaskItem> taskList)
@@ -142,46 +142,7 @@ namespace TaskTracker
             if (task != null) taskList.Remove(task);
 
             // write to file
-            WriteToTaskListToFile(taskList);
-        }
-
-        static List<TaskItem> ImportTasksJsonFile()
-        {
-            // check if file exists
-            if (!File.Exists(Constants.FILEPATH))
-            {
-                Console.WriteLine($"File doesn't exist... Creating file.");
-                // if not, create file
-                File.Create(Constants.FILEPATH).Close();
-                Console.WriteLine($"File created.");
-            }
-
-            // read file contents
-            string jsonString = File.ReadAllText(Constants.FILEPATH);
-
-            // convert json string to object
-            if (string.IsNullOrEmpty(jsonString))
-            {
-                Console.WriteLine($"File is empty... Creating empty list.");
-                // if file is empty, create empty list
-                return new List<TaskItem>();
-            }
-            else
-            {
-                var tasks = JsonSerializer.Deserialize<List<TaskItem>>(jsonString);
-                return tasks ?? new List<TaskItem>(); // Ensure a non-null return value
-            }
-        }
-
-        static void WriteToTaskListToFile(List<TaskItem> taskList)
-        {
-            // serialize object
-            string jsonString = JsonSerializer.Serialize(taskList);
-
-            // write to file
-            File.WriteAllText(Constants.FILEPATH, jsonString);
-
-            //Console.WriteLine(jsonString);    // todo: change to debug log maybe?
+            FileManager.WriteToTaskListToFile(taskList);
         }
 
         static TaskItem CreateTaskItem(int id, string description, string status = Status.TODO)
