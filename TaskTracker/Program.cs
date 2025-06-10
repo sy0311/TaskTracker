@@ -8,14 +8,6 @@ namespace TaskTracker
 {
     class Program
     {
-        // Define constants for task statuses
-        public const string STATUS_TODO = "todo";
-        public const string STATUS_IN_PROGRESS = "in-progress";
-        public const string STATUS_DONE = "done";
-
-        public static string FILENAME = "tasks.json";
-        public static string FILEPATH = Path.Combine(Directory.GetCurrentDirectory(), FILENAME);
-
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, Welcome to your Task Tracker!\n");
@@ -77,11 +69,11 @@ namespace TaskTracker
                         break;
                     case "mark-in-progress":
                         id = int.Parse(cmdLineArgs[1]);
-                        UpdateTask(id, taskList, status: STATUS_IN_PROGRESS);
+                        UpdateTask(id, taskList, status: Status.IN_PROGRESS);
                         break;
                     case "mark-done":
                         id = int.Parse(cmdLineArgs[1]);
-                        UpdateTask(id, taskList, status: STATUS_DONE);
+                        UpdateTask(id, taskList, status: Status.DONE);
                         break;
                     case "list":
                         if (cmdLineArgs.Length == 1)
@@ -156,16 +148,16 @@ namespace TaskTracker
         static List<TaskItem> ImportTasksJsonFile()
         {
             // check if file exists
-            if (!File.Exists(FILEPATH))
+            if (!File.Exists(Constants.FILEPATH))
             {
                 Console.WriteLine($"File doesn't exist... Creating file.");
                 // if not, create file
-                File.Create(FILEPATH).Close();
+                File.Create(Constants.FILEPATH).Close();
                 Console.WriteLine($"File created.");
             }
 
             // read file contents
-            string jsonString = File.ReadAllText(FILEPATH);
+            string jsonString = File.ReadAllText(Constants.FILEPATH);
 
             // convert json string to object
             if (string.IsNullOrEmpty(jsonString))
@@ -187,12 +179,12 @@ namespace TaskTracker
             string jsonString = JsonSerializer.Serialize(taskList);
 
             // write to file
-            File.WriteAllText(FILEPATH, jsonString);
+            File.WriteAllText(Constants.FILEPATH, jsonString);
 
             //Console.WriteLine(jsonString);    // todo: change to debug log maybe?
         }
 
-        static TaskItem CreateTaskItem(int id, string description, string status = STATUS_TODO)
+        static TaskItem CreateTaskItem(int id, string description, string status = Status.TODO)
         {
             // todo: generate id
             return new TaskItem
@@ -215,13 +207,13 @@ namespace TaskTracker
 
             string[] headers = { "Id", "Description", "Status", "Created At", "Updated At" };
 
-            Console.WriteLine($"| {headers[0],-5} | {headers[1],-20} | {headers[2],-15} | {headers[3],-25} | {headers[4],-25} |");
+            Console.WriteLine($"| {headers[0],-5} | {headers[1],-25} | {headers[2],-15} | {headers[3],-25} | {headers[4],-25} |");
 
             foreach (TaskItem task in taskList)
             {
                 if (status == null || task.Status == status)
                 {
-                    Console.WriteLine($"| {task.Id,-5} | {task.Description,-20} | {task.Status,-15} | {task.createdAt,-25} | {task.updatedAt,-25} |");
+                    Console.WriteLine($"| {task.Id,-5} | {task.Description,-25} | {task.Status,-15} | {task.createdAt,-25} | {task.updatedAt,-25} |");
                 }
             }
         }
