@@ -20,25 +20,13 @@ namespace TaskTracker
             List<TaskItem> taskList = FileManager.ImportTasksJsonFile();
             LoggerProvider.logger.Information("Imported tasks from json file.");
 
-            // todo: move welcome message to a separate method
-
             // Display welcome message and commands to user
-            Console.WriteLine("Hello, Welcome to your Task Tracker!\n");
-            Console.WriteLine("Available commands:");
-            foreach (var command in Commands.CommandDescriptions)
-            {
-                Console.WriteLine($" - {command.Key}: {command.Value}");
-            }
-
-            LoggerProvider.logger.Information("Displayed welcome messages.");
-
+            DisplayStartupMessages();
 
             string? cmdLine = "";
 
             while (cmdLine != Commands.EXIT)
             {
-                // Ask user for a command
-
                 /* todo: test scenarios
                  * - if user enters an empty command
                  * - if user enters an invalid command
@@ -46,8 +34,7 @@ namespace TaskTracker
                  * - command with capitals
                 */
 
-                // todo: move user input to a separate method
-
+                // Ask user for a command
                 LoggerProvider.logger.Information($"Reading user input...");
                 Console.WriteLine("\nEnter a command: ");
                 cmdLine = Console.ReadLine();
@@ -150,6 +137,18 @@ namespace TaskTracker
 
             LoggerProvider.logger.Information($"Exiting Program.");
             Console.WriteLine($"Exiting program... Goodbye :)");
+        }
+
+        static void DisplayStartupMessages()
+        {
+            Console.WriteLine("Hello, Welcome to your Task Tracker!\n");
+            Console.WriteLine("Available commands:");
+            foreach (var command in Commands.CommandDescriptions)
+            {
+                Console.WriteLine($" - {command.Key}: {command.Value}");
+            }
+
+            LoggerProvider.logger.Information("Displayed welcome messages.");
         }
 
         static string GetArgsForAddCommand(string input)
