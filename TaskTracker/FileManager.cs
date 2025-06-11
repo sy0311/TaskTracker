@@ -15,10 +15,9 @@ namespace TaskTracker
             // check if file exists
             if (!File.Exists(Constants.FILEPATH))
             {
-                Console.WriteLine($"File doesn't exist... Creating file.");
+                LoggerProvider.logger.Information($"Task file {Constants.FILEPATH} doesn't exist. Creating an empty file...");
                 // if not, create file
                 File.Create(Constants.FILEPATH).Close();
-                Console.WriteLine($"File created.");
             }
 
             // read file contents
@@ -27,7 +26,6 @@ namespace TaskTracker
             // convert json string to object
             if (string.IsNullOrEmpty(jsonString))
             {
-                Console.WriteLine($"File is empty... Creating empty list.");
                 // if file is empty, create empty list
                 return new List<TaskItem>();
             }
@@ -46,7 +44,7 @@ namespace TaskTracker
             // write to file
             File.WriteAllText(Constants.FILEPATH, jsonString);
 
-            //Console.WriteLine(jsonString);    // todo: change to debug log maybe?
+            LoggerProvider.logger.Information($"Wrote tasks into file.");
         }
     }
 }

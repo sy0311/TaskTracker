@@ -10,7 +10,7 @@ namespace TaskTracker
     {
         public static void AddTask(string taskName, List<TaskItem> taskList)
         {
-            Console.WriteLine($"Adding task {taskName}...");
+            //Console.WriteLine($"Adding task {taskName}...");
 
             // create task item
             var newTaskId = taskList.Any() ? taskList.Max(x => x.Id) + 1 : 1;
@@ -19,12 +19,14 @@ namespace TaskTracker
             // add to list
             taskList.Add(newTask);
 
+            LoggerProvider.logger.Information($"Added a new task. Id: {newTaskId}, Description: {taskName}");
+
             FileManager.WriteToTaskListToFile(taskList);
         }
 
         public static void UpdateTask(int id, List<TaskItem> taskList, string? description = null, string? status = null)
         {
-            Console.WriteLine($"Updating task with id {id}...");
+            //Console.WriteLine($"Updating task with id {id}...");
 
             // Find item on list with matching id
             var task = taskList.FirstOrDefault(i => i.Id == id);
@@ -44,9 +46,13 @@ namespace TaskTracker
             }
             else
             {
-                Console.WriteLine($"Task with id={id} doesn't exist.");
-
+                string message = $"Task with id={id} doesn't exist.";
+                LoggerProvider.logger.Warning($"Command failed. {message}");
+                Console.WriteLine(message);
+                return;
             }
+
+            LoggerProvider.logger.Information($"Updated task. Id: {id}, Description: {task.Description}");
 
             // write to file
             FileManager.WriteToTaskListToFile(taskList);
@@ -54,12 +60,22 @@ namespace TaskTracker
 
         public static void DeleteTask(int id, List<TaskItem> taskList)
         {
-            Console.WriteLine($"Deleting task with id {id}...");
+            //Console.WriteLine($"Deleting task with id {id}...");
 
             // find item on list with matching id
             var task = taskList.FirstOrDefault(i => i.Id == id);
 
-            if (task != null) taskList.Remove(task);
+            if (task == null)
+            {
+                string message = $"Task with id={id} doesn't exist.";
+                LoggerProvider.logger.Warning($"Command failed. {message}");
+                Console.WriteLine(message);
+                return;
+            }
+                
+            taskList.Remove(task);
+
+            LoggerProvider.logger.Information($"Deleted task. Id: {id}, Description: {task.Description}");
 
             // write to file
             FileManager.WriteToTaskListToFile(taskList);
@@ -67,7 +83,6 @@ namespace TaskTracker
 
         public static TaskItem CreateTaskItem(int id, string description, string status = Status.TODO)
         {
-            // todo: generate id
             return new TaskItem
             {
                 Id = id,
@@ -83,6 +98,7 @@ namespace TaskTracker
             if (taskList.Count == 0)
             {
                 Console.WriteLine("No tasks found.");
+                LoggerProvider.logger.Information($"No tasks in file to list.");
                 return;
             }
 
@@ -97,6 +113,7 @@ namespace TaskTracker
                     Console.WriteLine($"| {task.Id,-5} | {task.Description,-25} | {task.Status,-15} | {task.createdAt,-25} | {task.updatedAt,-25} |");
                 }
             }
+            LoggerProvider.logger.Information($"Finished listing tasks.");
         }
     }
 }

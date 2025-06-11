@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Core;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
@@ -11,33 +14,28 @@ namespace TaskTracker
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, Welcome to your Task Tracker!\n");
+            LoggerProvider.logger.Information("---------- TaskTracker Program Started ----------");
 
+            // import tasks from json file
             List<TaskItem> taskList = FileManager.ImportTasksJsonFile();
+            LoggerProvider.logger.Information("Imported tasks from json file.");
 
-            // Create a Dictionary of all the commands
-            Dictionary<string, string> commands = new Dictionary<string, string>
-            {
-                { $"{Commands.ADD} \"<task-name>\"", "Add a new task" },
-                { $"{Commands.UPDATE} <id> \"<new-task-name>\"", "Update an existing task" },
-                { $"{Commands.DELETE} <id>", "Delete a task" },
-                { $"{Commands.MARK_IN_PROGRESS} <id>", "Mark a task in progress" },
-                { $"{Commands.MARK_DONE} <id>", "Mark a task done" },
-                { $"{Commands.LIST}", "List all tasks" },
-                { $"{Commands.LIST} <status>", "List tasks by status" },
-                { Commands.EXIT , "End Program"}
-            };
+            // todo: move welcome message to a separate method
 
-            // Display the commands to the user
+            // Display welcome message and commands to user
+            Console.WriteLine("Hello, Welcome to your Task Tracker!\n");
             Console.WriteLine("Available commands:");
-            foreach (var command in commands)
+            foreach (var command in Commands.CommandDescriptions)
             {
                 Console.WriteLine($" - {command.Key}: {command.Value}");
             }
 
+            LoggerProvider.logger.Information("Displayed welcome messages.");
+
+
             string? cmdLine = "";
 
-            while (cmdLine != "end")
+            while (cmdLine != Commands.EXIT)
             {
                 // Ask user for a command
 
@@ -48,12 +46,16 @@ namespace TaskTracker
                  * - command with capitals
                 */
 
+                // todo: move user input to a separate method
+
+                LoggerProvider.logger.Information($"Reading user input...");
                 Console.WriteLine("\nEnter a command: ");
                 cmdLine = Console.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(cmdLine))
                 {
                     Console.WriteLine("Invalid command. Please try again.");
+                    LoggerProvider.logger.Warning($"User provided a null or whitespace input.");
                     continue;
                 }
 
@@ -61,8 +63,6 @@ namespace TaskTracker
 
                 string taskName;
                 int id;
-
-                // todo: try catch FormatException
 
                 try
                 {
@@ -80,7 +80,7 @@ namespace TaskTracker
                              * - add "task name" (white spaces at the end)
                              * - add "task name" fsfsdkj
                              */
-
+                            LoggerProvider.logger.Information($"{cmdVerb} command identified...");
                             taskName = GetArgsForAddCommand(cmdLine);
                             TaskService.AddTask(taskName, taskList);
                             break;
@@ -96,23 +96,28 @@ namespace TaskTracker
                              * - update id which does not exist
                              */
 
+                            LoggerProvider.logger.Information($"{cmdVerb} command identified...");
                             (id, taskName) = GetArgsForUpdateCommand(cmdLine);
                             TaskService.UpdateTask(id, taskList, description: taskName);
                             break;
 
                         case Commands.DELETE:
+                            LoggerProvider.logger.Information($"{cmdVerb} command identified...");
                             id = GetArgsForCommandWithId(cmdLine, Commands.DELETE);
                             TaskService.DeleteTask(id, taskList);
                             break;
                         case Commands.MARK_IN_PROGRESS:
+                            LoggerProvider.logger.Information($"{cmdVerb} command identified...");
                             id = GetArgsForCommandWithId(cmdLine, Commands.MARK_IN_PROGRESS);
                             TaskService.UpdateTask(id, taskList, status: Status.IN_PROGRESS);
                             break;
                         case Commands.MARK_DONE:
+                            LoggerProvider.logger.Information($"{cmdVerb} command identified...");
                             id = GetArgsForCommandWithId(cmdLine, Commands.MARK_DONE);
                             TaskService.UpdateTask(id, taskList, status: Status.DONE);
                             break;
                         case Commands.LIST:
+                            LoggerProvider.logger.Information($"{cmdVerb} command identified...");
                             if (cmdLine.Split(' ').Length == 1)
                                 // list all
                                 TaskService.ListTasks(taskList);
@@ -122,27 +127,39 @@ namespace TaskTracker
                             else
                                 Console.WriteLine($"Invalid command format for '{Commands.LIST}' command.");
                             break;
+                        case Commands.EXIT:
+                            break;
                         default:
                             Console.WriteLine("Invalid command. Please try again.");
+                            LoggerProvider.logger.Information($"A command with an incorrect verb was provided.");
                             break;
                     }
                 }
                 catch (FormatException ex)
                 {
+                    LoggerProvider.logger.Warning(ex.Message);
                     Console.WriteLine(ex.Message);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                    string errorMessage = $"An unexpected error occurred: {ex.Message}";
+                    LoggerProvider.logger.Error(errorMessage);
+                    Console.WriteLine(errorMessage);
                 }
             }
+
+            LoggerProvider.logger.Information($"Exiting Program.");
+            Console.WriteLine($"Exiting program... Goodbye :)");
         }
 
         static string GetArgsForAddCommand(string input)
         {
 
             if (IsValidCommandFormat(input, $@"^{Commands.ADD}\s+""[^""]+""$"))
+            {
+                LoggerProvider.logger.Information($"Valid {Commands.ADD} command was provided");
                 return input.Split('"')[1];
+            }
 
             throw new FormatException($"Invalid command format for '{Commands.ADD}' command.");
         }
