@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace TaskTracker
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -57,50 +57,30 @@ namespace TaskTracker
                     switch (cmdVerb)
                     {
                         case Commands.ADD:
-
-                            /* todo tests
-                             * - add "task name
-                             * - add task name"
-                             * - add task name
-                             * - add "task name"
-                             * - add "task name" "and another"
-                             * - add "task name" (white spaces at the end)
-                             * - add "task name" fsfsdkj
-                             */
                             LoggerProvider.logger.Information($"{cmdVerb} command identified...");
-                            taskName = GetArgsForAddCommand(cmdLine);
+                            taskName = CommandParser.GetArgsForAddCommand(cmdLine);
                             TaskService.AddTask(taskName, taskList);
                             break;
 
                         case Commands.UPDATE:
-
-                            /* todo tests
-                             * - update 1 "new task name"
-                             * - update "new task name" 1
-                             * - update 1 new task name
-                             * - update 1 "new task name
-                             * - update 1.0 "new task name"
-                             * - update id which does not exist
-                             */
-
                             LoggerProvider.logger.Information($"{cmdVerb} command identified...");
-                            (id, taskName) = GetArgsForUpdateCommand(cmdLine);
+                            (id, taskName) = CommandParser.GetArgsForUpdateCommand(cmdLine);
                             TaskService.UpdateTask(id, taskList, description: taskName);
                             break;
 
                         case Commands.DELETE:
                             LoggerProvider.logger.Information($"{cmdVerb} command identified...");
-                            id = GetArgsForCommandWithId(cmdLine, Commands.DELETE);
+                            id = CommandParser.GetArgsForCommandWithId(cmdLine, Commands.DELETE);
                             TaskService.DeleteTask(id, taskList);
                             break;
                         case Commands.MARK_IN_PROGRESS:
                             LoggerProvider.logger.Information($"{cmdVerb} command identified...");
-                            id = GetArgsForCommandWithId(cmdLine, Commands.MARK_IN_PROGRESS);
+                            id = CommandParser.GetArgsForCommandWithId(cmdLine, Commands.MARK_IN_PROGRESS);
                             TaskService.UpdateTask(id, taskList, status: Status.IN_PROGRESS);
                             break;
                         case Commands.MARK_DONE:
                             LoggerProvider.logger.Information($"{cmdVerb} command identified...");
-                            id = GetArgsForCommandWithId(cmdLine, Commands.MARK_DONE);
+                            id = CommandParser.GetArgsForCommandWithId(cmdLine, Commands.MARK_DONE);
                             TaskService.UpdateTask(id, taskList, status: Status.DONE);
                             break;
                         case Commands.LIST:
@@ -149,45 +129,6 @@ namespace TaskTracker
             }
 
             LoggerProvider.logger.Information("Displayed welcome messages.");
-        }
-
-        static string GetArgsForAddCommand(string input)
-        {
-
-            if (IsValidCommandFormat(input, $@"^{Commands.ADD}\s+""[^""]+""$"))
-            {
-                LoggerProvider.logger.Information($"Valid {Commands.ADD} command was provided");
-                return input.Split('"')[1];
-            }
-
-            throw new FormatException($"Invalid command format for '{Commands.ADD}' command.");
-        }
-
-        static (int, string) GetArgsForUpdateCommand(string input)
-        {
-            if (IsValidCommandFormat(input, $@"^{Commands.UPDATE}\s+\d+\s+""[^""]+""$"))
-            {
-                int id = int.Parse(input.Split(' ')[1]);
-                string taskName = input.Split('"')[1];
-                return (id, taskName);
-            }
-
-            throw new FormatException($"Invalid command format for '{Commands.UPDATE}' command.");
-        }
-
-        static int GetArgsForCommandWithId(string input, string commandVerb)
-        {
-            if (IsValidCommandFormat(input, $@"^{commandVerb}\s+\d+$"))
-            {
-                return int.Parse(input.Split(' ')[1]);
-            }
-            throw new FormatException($"Invalid command format for '{commandVerb}' command.");
-        }
-
-        static bool IsValidCommandFormat(string input, string regexPattern)
-        {
-            // Check if the command line is of the correct format
-            return Regex.IsMatch(input.Trim(), regexPattern);
         }
     }
 }
