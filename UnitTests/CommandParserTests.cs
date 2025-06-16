@@ -1,4 +1,4 @@
-using System;
+using TaskTracker.Utilities;
 using Xunit;
 
 namespace UnitTests
@@ -16,7 +16,7 @@ namespace UnitTests
             // Arrange
 
             // Act
-            var result = TaskTracker.CommandParser.GetArgsForAddCommand(command);
+            var result = CommandParser.GetArgsForAddCommand(command);
 
             // Assert;
             Assert.Equal(expectedTaskName, result);
@@ -36,7 +36,7 @@ namespace UnitTests
             // Arrange
 
             // Act Assert
-            var ex = Assert.Throws<FormatException>(() => TaskTracker.CommandParser.GetArgsForAddCommand(command));
+            var ex = Assert.Throws<FormatException>(() => CommandParser.GetArgsForAddCommand(command));
 
             string expectedMessage = $"Invalid command format for 'add' command.";
             Assert.Equal(expectedMessage, ex.Message);
@@ -54,7 +54,7 @@ namespace UnitTests
             // Arrange
 
             // Act
-            var result = TaskTracker.CommandParser.GetArgsForUpdateCommand(command);
+            var result = CommandParser.GetArgsForUpdateCommand(command);
 
             // Assert
             Assert.Equal(expectedId, result.Item1);
@@ -77,7 +77,7 @@ namespace UnitTests
             // Arrange
 
             // Act Assert
-            var ex = Assert.Throws<FormatException>(() => TaskTracker.CommandParser.GetArgsForUpdateCommand(command));
+            var ex = Assert.Throws<FormatException>(() => CommandParser.GetArgsForUpdateCommand(command));
 
             string expectedMessage = $"Invalid command format for 'update' command.";
             Assert.Equal(expectedMessage, ex.Message);
@@ -101,7 +101,7 @@ namespace UnitTests
             var pattern = $@"^{commandVerb}\s+\d+$";
 
             // Act
-            int result = TaskTracker.CommandParser.GetArgsForCommandWithId(command, commandVerb);
+            int result = CommandParser.GetArgsForCommandWithId(command, commandVerb);
 
             // Assert
             Assert.Equal(expectedId, result);
@@ -120,7 +120,7 @@ namespace UnitTests
             var pattern = $@"^{commandVerb}\s+\d+$";
 
             // Act Assert
-            var ex = Assert.Throws<FormatException>(() => TaskTracker.CommandParser.GetArgsForCommandWithId(command, commandVerb));
+            var ex = Assert.Throws<FormatException>(() => CommandParser.GetArgsForCommandWithId(command, commandVerb));
 
             string expectedMessage = $"Invalid command format for '{commandVerb}' command.";
             Assert.Equal(expectedMessage, ex.Message);

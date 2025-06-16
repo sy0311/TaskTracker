@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TaskTracker.Models;
+using TaskTracker.Utilities;
 
-namespace TaskTracker
+namespace TaskTracker.Services
 {
     public static class TaskService
     {

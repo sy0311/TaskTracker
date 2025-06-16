@@ -1,12 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Core;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using TaskTracker.Models;
+using TaskTracker.Services;
+using TaskTracker.Utilities;
 
 namespace TaskTracker
 {

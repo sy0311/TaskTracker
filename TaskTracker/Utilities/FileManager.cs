@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
+using TaskTracker.Models;
 
-namespace TaskTracker
+namespace TaskTracker.Utilities
 {
     // defines FileManager as a static class that can be used in Program.cs like a utility class
     public static class FileManager
