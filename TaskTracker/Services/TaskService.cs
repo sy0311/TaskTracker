@@ -27,19 +27,22 @@ namespace TaskTracker.Services
 
             // Find item on list with matching id
             var task = taskList.FirstOrDefault(i => i.Id == id);
+            var isUpdated = false;
 
             // Update item
             if (task != null)
             {
-                if (description != null)
+                if (!string.IsNullOrWhiteSpace(description))
                 {
                     task.Description = description;
+                    isUpdated = true;
                 }
-                if (status != null)
+                if (!string.IsNullOrWhiteSpace(status))
                 {
                     task.Status = status;
+                    isUpdated = true;
                 }
-                task.updatedAt = DateTime.Now;
+                if (isUpdated) task.UpdatedAt = DateTime.Now;
             }
             else
             {
@@ -78,18 +81,6 @@ namespace TaskTracker.Services
             FileManager.WriteToTaskListToFile(taskList);
         }
 
-        public static TaskItem CreateTaskItem(int id, string description, string status = Status.TODO)
-        {
-            return new TaskItem
-            {
-                Id = id,
-                Description = description,
-                Status = status,
-                createdAt = DateTime.Now,
-                updatedAt = DateTime.Now
-            };
-        }
-
         public static void ListTasks(List<TaskItem> taskList, string? status = null)
         {
             if (taskList.Count == 0)
@@ -107,10 +98,22 @@ namespace TaskTracker.Services
             {
                 if (status == null || task.Status == status)
                 {
-                    Console.WriteLine($"| {task.Id,-5} | {task.Description,-25} | {task.Status,-15} | {task.createdAt,-25} | {task.updatedAt,-25} |");
+                    Console.WriteLine($"| {task.Id,-5} | {task.Description,-25} | {task.Status,-15} | {task.CreatedAt,-25} | {task.UpdatedAt,-25} |");
                 }
             }
             LoggerProvider.logger.Information($"Finished listing tasks.");
+        }
+
+        private static TaskItem CreateTaskItem(int id, string description, string status = Status.TODO)
+        {
+            return new TaskItem
+            {
+                Id = id,
+                Description = description,
+                Status = status,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
         }
     }
 }

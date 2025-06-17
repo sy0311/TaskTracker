@@ -18,7 +18,7 @@ namespace UnitTests
             // Act
             var result = CommandParser.GetArgsForAddCommand(command);
 
-            // Assert;
+            // Assert
             Assert.Equal(expectedTaskName, result);
         }
 
