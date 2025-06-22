@@ -8,6 +8,11 @@ namespace TaskTracker
     {
         static void Main(string[] args)
         {
+
+            /** potential todo for the future
+            - dependency injection for the service
+            - using enum vs constant for Status?
+            **/
             LoggerProvider.logger.Information("---------- TaskTracker Program Started ----------");
 
             // import tasks from json file
@@ -21,13 +26,6 @@ namespace TaskTracker
 
             while (cmdLine != Commands.EXIT)
             {
-                /* todo: test scenarios
-                 * - if user enters an empty command
-                 * - if user enters an invalid command
-                 * - if user enters whitespaces
-                 * - command with capitals
-                */
-
                 // Ask user for a command
                 LoggerProvider.logger.Information($"Reading user input...");
                 Console.WriteLine("\nEnter a command: ");
