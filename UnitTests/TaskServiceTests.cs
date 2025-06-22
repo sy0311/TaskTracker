@@ -449,12 +449,6 @@ namespace UnitTests
         #endregion
 
         #region DeleteTask
-        /** happy path
-         * - delete task that exists
-        unhappy path
-         * - empty task list
-         * - id doesnt exist in task list
-        **/
         [Fact]
         public void DeleteTask_TaskExists_DeletesTask()
         {
@@ -555,13 +549,279 @@ namespace UnitTests
         #endregion
 
         #region ListTasks
-        /**
-         * - list all tasks
-         * - list tasks with status filter
-         * - list empty task list
-         * - list empty task list with status filter
-         * - list a very long task description
-         **/
+        [Fact]
+        public void ListTasks_OneTaskNoStatusFilter_ShowsInConsole()
+        {
+            // Arrange
+
+            var taskItem = new TaskItem
+            {
+                Id = 1,
+                Description = "Task Name",
+                Status = "todo",
+                CreatedAt = new DateTime(2025, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2025, 6, 22, 14, 30, 10)
+            };
+
+            // redirect console output to a StringWriter. So we can verify the console output
+            var stringWriter = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(stringWriter);
+
+            var taskList = new List<TaskItem> { taskItem };
+
+            // Act
+            TaskService.ListTasks(taskList);
+
+            // Assert
+            string output = stringWriter.ToString();
+            Assert.Contains($"| Id    | Description               | Status          | Created At                | Updated At                |\r\n", output);
+            Assert.Contains($"| 1     | Task Name                 | todo            | 20/06/2025 11:30:05 am    | 22/06/2025 2:30:10 pm     |\r\n", output);
+
+            // restore the original console output
+            Console.SetOut(originalOut);
+        }
+
+        [Fact]
+        public void ListTasks_MultipleTasksNoStatusFilter_ShowsInConsole()
+        {
+            // Arrange
+
+            var taskItem = new TaskItem
+            {
+                Id = 1,
+                Description = "Task Name",
+                Status = "todo",
+                CreatedAt = new DateTime(2025, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2025, 6, 22, 14, 30, 10)
+            };
+
+            var taskItem2 = new TaskItem
+            {
+                Id = 2,
+                Description = "Second Task Name",
+                Status = "in-progress",
+                CreatedAt = new DateTime(2024, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2024, 6, 22, 14, 30, 10)
+            };
+
+            var taskItem3 = new TaskItem
+            {
+                Id = 3,
+                Description = "Third Task Name",
+                Status = "done",
+                CreatedAt = new DateTime(2023, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2023, 6, 22, 14, 30, 10)
+            };
+
+            // redirect console output to a StringWriter. So we can verify the console output
+            var stringWriter = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(stringWriter);
+
+            var taskList = new List<TaskItem> { taskItem, taskItem2, taskItem3 };
+
+            // Act
+            TaskService.ListTasks(taskList);
+
+            // Assert
+            string output = stringWriter.ToString();
+            Assert.Contains($"| Id    | Description               | Status          | Created At                | Updated At                |\r\n", output);
+            Assert.Contains($"| 1     | Task Name                 | todo            | 20/06/2025 11:30:05 am    | 22/06/2025 2:30:10 pm     |\r\n", output);
+            Assert.Contains($"| 2     | Second Task Name          | in-progress     | 20/06/2024 11:30:05 am    | 22/06/2024 2:30:10 pm     |\r\n", output);
+            Assert.Contains($"| 3     | Third Task Name           | done            | 20/06/2023 11:30:05 am    | 22/06/2023 2:30:10 pm     |\r\n", output);
+
+            // restore the original console output
+            Console.SetOut(originalOut);
+        }
+
+        [Fact]
+        public void ListTasks_MultipleTasksWithStatusFilter_ShowsInConsole()
+        {
+            // Arrange
+
+            var taskItem = new TaskItem
+            {
+                Id = 1,
+                Description = "Task Name",
+                Status = "todo",
+                CreatedAt = new DateTime(2025, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2025, 6, 22, 14, 30, 10)
+            };
+
+            var taskItem2 = new TaskItem
+            {
+                Id = 2,
+                Description = "Second Task Name",
+                Status = "in-progress",
+                CreatedAt = new DateTime(2024, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2024, 6, 22, 14, 30, 10)
+            };
+
+            var taskItem3 = new TaskItem
+            {
+                Id = 3,
+                Description = "Third Task Name",
+                Status = "done",
+                CreatedAt = new DateTime(2023, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2023, 6, 22, 14, 30, 10)
+            };
+
+            // redirect console output to a StringWriter. So we can verify the console output
+            var stringWriter = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(stringWriter);
+
+            var taskList = new List<TaskItem> { taskItem, taskItem2, taskItem3 };
+
+            // Act
+            TaskService.ListTasks(taskList, "done");
+
+            // Assert
+            string output = stringWriter.ToString();
+            Assert.Contains($"| Id    | Description               | Status          | Created At                | Updated At                |\r\n", output);
+            Assert.DoesNotContain($"| 1     | Task Name                 | todo            | 20/06/2025 11:30:05 am    | 22/06/2025 2:30:10 pm     |\r\n", output);
+            Assert.DoesNotContain($"| 2     | Second Task Name          | in-progress     | 20/06/2024 11:30:05 am    | 22/06/2024 2:30:10 pm     |\r\n", output);
+            Assert.Contains($"| 3     | Third Task Name           | done            | 20/06/2023 11:30:05 am    | 22/06/2023 2:30:10 pm     |\r\n", output);
+
+            // restore the original console output
+            Console.SetOut(originalOut);
+        }
+
+        [Fact]
+        public void ListTasks_EmptyTaskListNoStatusFilter_ShowNoTaskMessage()
+        {
+            // Arrange
+
+            // redirect console output to a StringWriter. So we can verify the console output
+            var stringWriter = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(stringWriter);
+
+            var taskList = new List<TaskItem>();
+
+            // Act
+            TaskService.ListTasks(taskList);
+
+            // Assert
+            string output = stringWriter.ToString();
+            Assert.DoesNotContain($"| Id    | Description               | Status          | Created At                | Updated At                |\r\n", output);
+            Assert.Contains("No tasks found.", output);
+
+            // restore the original console output
+            Console.SetOut(originalOut);
+        }
+
+        [Fact]
+        public void ListTasks_EmptyTaskListWithStatusFilter_ShowNoTaskMessage()
+        {
+            // Arrange
+
+            // redirect console output to a StringWriter. So we can verify the console output
+            var stringWriter = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(stringWriter);
+
+            var taskList = new List<TaskItem>();
+
+            // Act
+            TaskService.ListTasks(taskList, "done");
+
+            // Assert
+            string output = stringWriter.ToString();
+            Assert.DoesNotContain($"| Id    | Description               | Status          | Created At                | Updated At                |\r\n", output);
+            Assert.Contains("No tasks found.", output);
+
+            // restore the original console output
+            Console.SetOut(originalOut);
+        }
+
+        [Fact]
+        public void ListTasks_NoTaskWithStatusFilter_ShowNoTaskMessage()
+        {
+            // Arrange
+
+            var taskItem = new TaskItem
+            {
+                Id = 1,
+                Description = "Task Name",
+                Status = "todo",
+                CreatedAt = new DateTime(2025, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2025, 6, 22, 14, 30, 10)
+            };
+
+            var taskItem2 = new TaskItem
+            {
+                Id = 2,
+                Description = "Second Task Name",
+                Status = "in-progress",
+                CreatedAt = new DateTime(2024, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2024, 6, 22, 14, 30, 10)
+            };
+
+            var taskItem3 = new TaskItem
+            {
+                Id = 3,
+                Description = "Third Task Name",
+                Status = "in-progress",
+                CreatedAt = new DateTime(2023, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2023, 6, 22, 14, 30, 10)
+            };
+
+            // redirect console output to a StringWriter. So we can verify the console output
+            var stringWriter = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(stringWriter);
+
+            var taskList = new List<TaskItem> { taskItem, taskItem2, taskItem3 };
+
+            // Act
+            TaskService.ListTasks(taskList, "done");
+
+            // Assert
+            string output = stringWriter.ToString();
+            Assert.Contains("No tasks found.", output);
+            Assert.DoesNotContain($"| Id    | Description               | Status          | Created At                | Updated At                |\r\n", output);
+            Assert.DoesNotContain($"| 1     | Task Name                 | todo            | 20/06/2025 11:30:05 am    | 22/06/2025 2:30:10 pm     |\r\n", output);
+            Assert.DoesNotContain($"| 2     | Second Task Name          | in-progress     | 20/06/2024 11:30:05 am    | 22/06/2024 2:30:10 pm     |\r\n", output);
+            Assert.DoesNotContain($"| 3     | Third Task Name           | done            | 20/06/2023 11:30:05 am    | 22/06/2023 2:30:10 pm     |\r\n", output);
+
+            // restore the original console output
+            Console.SetOut(originalOut);
+        }
+        [Fact]
+        public void ListTasks_TaskWithLongDescription_ShowsInConsole()
+        {
+            // Arrange
+
+            var taskItem = new TaskItem
+            {
+                Id = 1,
+                Description = "Task Name Task Name Task Name Task Name Task Name",
+                        // todo: probably better for us to limit task names when creating tasks and throw if too long
+                Status = "todo",
+                CreatedAt = new DateTime(2025, 6, 20, 11, 30, 05),
+                UpdatedAt = new DateTime(2025, 6, 22, 14, 30, 10)
+            };
+
+            // redirect console output to a StringWriter. So we can verify the console output
+            var stringWriter = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(stringWriter);
+
+            var taskList = new List<TaskItem> { taskItem };
+
+            // Act
+            TaskService.ListTasks(taskList);
+
+            // Assert
+            string output = stringWriter.ToString();
+            Assert.Contains($"| Id    | Description               | Status          | Created At                | Updated At                |\r\n", output);
+            Assert.Contains($"| 1     | Task Name Task Name Task Name Task Name Task Name | todo            | 20/06/2025 11:30:05 am    | 22/06/2025 2:30:10 pm     |\r\n", output);
+
+            // restore the original console output
+            Console.SetOut(originalOut);
+        }
         #endregion
     }
 }

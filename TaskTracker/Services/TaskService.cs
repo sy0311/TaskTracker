@@ -83,6 +83,12 @@ namespace TaskTracker.Services
 
         public static void ListTasks(List<TaskItem> taskList, string? status = null)
         {
+            // filter tasks by status if provided
+            if (status != null && taskList.Count != 0)
+            {
+                taskList = taskList.Where(t => t.Status.Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
             if (taskList.Count == 0)
             {
                 Console.WriteLine("No tasks found.");
@@ -96,10 +102,7 @@ namespace TaskTracker.Services
 
             foreach (TaskItem task in taskList)
             {
-                if (status == null || task.Status == status)
-                {
-                    Console.WriteLine($"| {task.Id,-5} | {task.Description,-25} | {task.Status,-15} | {task.CreatedAt,-25} | {task.UpdatedAt,-25} |");
-                }
+                Console.WriteLine($"| {task.Id,-5} | {task.Description,-25} | {task.Status,-15} | {task.CreatedAt,-25} | {task.UpdatedAt,-25} |");
             }
             LoggerProvider.logger.Information($"Finished listing tasks.");
         }
